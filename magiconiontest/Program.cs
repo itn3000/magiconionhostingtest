@@ -48,6 +48,7 @@ namespace magiconiontest
                 // shutdown service when client task has done
                 Console.WriteLine($"shutdown task");
                 await host.StopAsync();
+                // test for safe if multiple stop call.
                 await host.StopAsync();
                 Console.WriteLine($"all task done");
             }
