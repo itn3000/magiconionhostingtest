@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace MagicOnion.Extensions.Hosting
 {
-    public sealed class MagicOnionServerServiceOptions
+    sealed class MagicOnionServerServiceOptions
     {
         public Assembly[] SearchAssemblies;
         public IEnumerable<Type> Types;
