@@ -100,22 +100,7 @@ namespace MagicOnion.Extensions.Hosting
             IEnumerable<ServerPort> ports,
             IEnumerable<ChannelOption> channelOptions = null)
         {
-            return hostBuilder.ConfigureServices((ctx, services) =>
-            {
-                services.AddTransient<IHostedService, MagicOnionServerService>(serviceProvider =>
-                {
-                    return new MagicOnionServerService(
-                        new MagicOnionServerServiceOptions()
-                        {
-                            ChannelOptions = channelOptions,
-                            MagicOnionOptions = null,
-                            Ports = ports,
-                            SearchAssemblies = null,
-                            Types = null
-                        }
-                    );
-                });
-            });
+            return UseMagicOnion(hostBuilder, ports, new MagicOnionOptions());
         }
         public static IHostBuilder UseMagicOnion(this IHostBuilder hostBuilder,
             IEnumerable<ServerPort> ports,
