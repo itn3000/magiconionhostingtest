@@ -27,31 +27,30 @@ namespace magiconiontest
     }
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            var host = new HostBuilder()
-                .UseMagicOnion(new ServerPort[] { new ServerPort("localhost", 10012, ServerCredentials.Insecure) })
-                .Build();
-            host.Start();
-            using (var cts = new CancellationTokenSource())
+            using (var host = new HostBuilder()
+                .UseMagicOnion(
+                    new ServerPort[] { new ServerPort("localhost", 10012, ServerCredentials.Insecure) },
+                    searchAssemblies: new Assembly[] { Assembly.GetEntryAssembly() },
+                    options: new MagicOnionOptions())
+                .Build())
             {
-                Task.WaitAll(
-                    host.WaitForShutdownAsync(cts.Token),
-                    Task.Run(async () =>
-                    {
-                        // client task
-                        var channel = new Channel("localhost", 10012, ChannelCredentials.Insecure);
-                        var client = MagicOnionClient.Create<IMyService>(channel);
-                        for (int i = 0; i < 10; i++)
-                        {
-                            var ret = await client.SumAsync(i, i * 2);
-                            Console.WriteLine($"{i}, ret = {ret}");
-                        }
-                        cts.Cancel();
-                    })
-                );
+                host.Start();
+                // client task
+                var channel = new Channel("localhost", 10012, ChannelCredentials.Insecure);
+                var client = MagicOnionClient.Create<IMyService>(channel);
+                for (int i = 0; i < 10; i++)
+                {
+                    var ret = await client.SumAsync(i, i * 2);
+                    Console.WriteLine($"{i}, ret = {ret}");
+                }
+                // shutdown service when client task has done
+                Console.WriteLine($"shutdown task");
+                await host.StopAsync();
+                await host.StopAsync();
+                Console.WriteLine($"all task done");
             }
-            host.Run();
         }
     }
 }
