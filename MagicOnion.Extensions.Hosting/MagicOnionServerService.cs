@@ -51,8 +51,6 @@ namespace MagicOnion.Extensions.Hosting
             _ChannelOptions = options.ChannelOptions;
         }
         global::Grpc.Core.Server _Server;
-        // object ServerLockObject = new object();
-        // SemaphoreSlim _ServerLockObject = new SemaphoreSlim(1, 1);
         public Task StartAsync(CancellationToken cancellationToken)
         {
             StartTask(cancellationToken);
@@ -100,9 +98,30 @@ namespace MagicOnion.Extensions.Hosting
     {
         public static IHostBuilder UseMagicOnion(this IHostBuilder hostBuilder,
             IEnumerable<ServerPort> ports,
+            IEnumerable<ChannelOption> channelOptions = null)
+        {
+            return hostBuilder.ConfigureServices((ctx, services) =>
+            {
+                services.AddTransient<IHostedService, MagicOnionServerService>(serviceProvider =>
+                {
+                    return new MagicOnionServerService(
+                        new MagicOnionServerServiceOptions()
+                        {
+                            ChannelOptions = channelOptions,
+                            MagicOnionOptions = null,
+                            Ports = ports,
+                            SearchAssemblies = null,
+                            Types = null
+                        }
+                    );
+                });
+            });
+        }
+        public static IHostBuilder UseMagicOnion(this IHostBuilder hostBuilder,
+            IEnumerable<ServerPort> ports,
+            MagicOnionOptions options,
             IEnumerable<Type> types = null,
             Assembly[] searchAssemblies = null,
-            MagicOnionOptions options = null,
             IEnumerable<ChannelOption> channelOptions = null)
         {
             return hostBuilder.ConfigureServices((ctx, services) =>
